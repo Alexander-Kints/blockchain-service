@@ -74,8 +74,12 @@ WSGI_APPLICATION = 'blockchain_service.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('PGSQL_DBNAME'),
+        'USER': os.environ.get('PGSQL_USER'),
+        'PASSWORD': os.environ.get('PGSQL_PASSWORD'),
+        'HOST': os.environ.get('PGSQL_HOST'),
+        'PORT': os.environ.get('PGSQL_PORT'),
     }
 }
 

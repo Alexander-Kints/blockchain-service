@@ -1,6 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
+from rest_framework.pagination import PageNumberPagination
 from .serializers import TokenSerializer
 from .models import Token
 
@@ -14,6 +15,14 @@ class TokenCreateAPIView(APIView):
         return Response(model_serializer.data)
 
 
+class TokenListAPIViewPagination(PageNumberPagination):
+    page_size = 200
+    max_page_size = 500
+    page_size_query_param = 'page_size'
+    page_query_param = 'page'
+
+
 class TokenListAPIView(ListAPIView):
     queryset = Token.objects.all()
     serializer_class = TokenSerializer
+    pagination_class = TokenListAPIViewPagination

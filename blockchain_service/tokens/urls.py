@@ -1,7 +1,8 @@
 from django.urls import path
 
-from .views import CreateAPIView
+from .views import *
 
 urlpatterns = [
-    path('create/', CreateAPIView.as_view())
+    path('create/', TokenCreateAPIView.as_view()),
+    path('list/', TokenListAPIView.as_view()),
 ]

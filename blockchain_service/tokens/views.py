@@ -5,13 +5,17 @@ from rest_framework.generics import ListAPIView
 from rest_framework.pagination import PageNumberPagination
 from .serializers import TokenSerializer
 from .models import Token
-from .web3_service import Web3Service, generate_random_str
+from .web3_service import Web3Service, generate_random_str, is_hex
 
 
 class TokenCreateAPIView(APIView):
     def post(self, request):
         model_serializer = TokenSerializer(data=request.data)
         model_serializer.is_valid(raise_exception=True)
+
+        if not is_hex(request.data['owner']):
+            return Response({"message": "no valid owner address"})
+
         unique_hash = generate_random_str(20)
         service = Web3Service(
             network_url=os.environ.get('NFT_NETWORK_URL'),

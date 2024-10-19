@@ -58,3 +58,11 @@ class Web3Service:
 def generate_random_str(length: int) -> str:
     source = ascii_letters + digits
     return ''.join(choice(source) for _ in range(length))
+
+
+def is_hex(string: str) -> bool:
+    try:
+        int(string, 16)
+        return True
+    except ValueError:
+        return False

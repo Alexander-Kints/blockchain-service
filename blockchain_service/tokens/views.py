@@ -2,6 +2,8 @@ import os
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
+from drf_spectacular.utils import extend_schema, inline_serializer
+from rest_framework import serializers
 from .serializers import TokenSerializer
 from .models import Token
 from .web3_service import Web3Service, generate_random_str, is_hex
@@ -9,6 +11,27 @@ from .paginations import TokenListAPIViewPagination
 
 
 class TokenCreateAPIView(APIView):
+    @extend_schema(
+        description='Mint Token',
+        request=inline_serializer(
+            name='TokenRequestBody',
+            fields={
+                'media_url': serializers.CharField(),
+                'owner': serializers.CharField(default='hex_string')
+            }
+        ),
+        responses={
+            200: TokenSerializer,
+            400: inline_serializer(
+                name='BadRequest',
+                fields={
+                    'message': serializers.CharField(
+                        default='no valid owner address'
+                    )
+                }
+            )
+        }
+    )
     def post(self, request):
         model_serializer = TokenSerializer(data=request.data)
         model_serializer.is_valid(raise_exception=True)
@@ -43,6 +66,17 @@ class TokenListAPIView(ListAPIView):
 
 
 class TokenTotalSupplyAPIView(APIView):
+    @extend_schema(
+        description='Get total supply of Token',
+        responses={
+            200: inline_serializer(
+                name='TotalSupplyResponse',
+                fields={
+                    'result': serializers.IntegerField(default=10000)
+                }
+            )
+        }
+    )
     def get(self, request):
         service = Web3Service(
             network_url=os.environ.get('NFT_NETWORK_URL'),

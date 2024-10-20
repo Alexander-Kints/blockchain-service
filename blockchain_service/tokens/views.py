@@ -2,10 +2,10 @@ import os
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.generics import ListAPIView
-from rest_framework.pagination import PageNumberPagination
 from .serializers import TokenSerializer
 from .models import Token
 from .web3_service import Web3Service, generate_random_str, is_hex
+from .paginations import TokenListAPIViewPagination
 
 
 class TokenCreateAPIView(APIView):
@@ -17,6 +17,7 @@ class TokenCreateAPIView(APIView):
             return Response({"message": "no valid owner address"})
 
         unique_hash = generate_random_str(20)
+        model_serializer.save(unique_hash=unique_hash)
         service = Web3Service(
             network_url=os.environ.get('NFT_NETWORK_URL'),
             contract_address=os.environ.get('NFT_CONTRACT_ADDRESS'),
@@ -28,18 +29,24 @@ class TokenCreateAPIView(APIView):
             owner=request.data['owner'],
             private_key=os.environ.get('NFT_PRIVATE_KEY')
         )
-        model_serializer.save(unique_hash=unique_hash, tx_hash=tx_hash)
+        if tx_hash != '':
+            model_serializer.save(tx_hash=tx_hash)
+
         return Response(model_serializer.data)
 
 
-class TokenListAPIViewPagination(PageNumberPagination):
-    page_size = 200
-    max_page_size = 500
-    page_size_query_param = 'page_size'
-    page_query_param = 'page'
-
-
 class TokenListAPIView(ListAPIView):
-    queryset = Token.objects.all()
+    # Сортировка, чтобы не ругался UnorderedObjectListWarning на пагинацию
+    queryset = Token.objects.all().order_by('id')
     serializer_class = TokenSerializer
     pagination_class = TokenListAPIViewPagination
+
+
+class TokenTotalSupplyAPIView(APIView):
+    def get(self, request):
+        service = Web3Service(
+            network_url=os.environ.get('NFT_NETWORK_URL'),
+            contract_address=os.environ.get('NFT_CONTRACT_ADDRESS'),
+            abi_filepath='static/ERC_721_abi.json'
+        )
+        return Response({"result": service.total_supply()})

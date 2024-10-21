@@ -37,7 +37,10 @@ class TokenCreateAPIView(APIView):
         model_serializer.is_valid(raise_exception=True)
 
         if not is_hex(request.data['owner']):
-            return Response({"message": "no valid owner address"})
+            return Response(
+                {"message": "no valid owner address"},
+                status=400
+            )
 
         unique_hash = generate_random_str(20)
         model_serializer.save(unique_hash=unique_hash)

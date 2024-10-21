@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: postgres
+    environment:
+      POSTGRES_USER: dockerpost
+      POSTGRES_PASSWORD: dockerpost
+      POSTGRES_DB: dockerpost
+    ports:
+      - "5432"
+  blockchain-service:
+    build:
+      context: ./blockchain_service
+    ports:
+      - "9000:8000"
+    depends_on:
+      - postgres

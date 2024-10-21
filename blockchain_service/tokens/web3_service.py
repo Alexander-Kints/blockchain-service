@@ -61,8 +61,10 @@ def generate_random_str(length: int) -> str:
 
 
 def is_hex(string: str) -> bool:
-    try:
-        int(string, 16)
-        return True
-    except ValueError:
-        return False
+    if len(string) > 2 and string[:2] == '0x':
+        try:
+            int(string, 16)
+            return True
+        except ValueError:
+            return False
+    return False
